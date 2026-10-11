@@ -24,6 +24,7 @@ main.py
 `main.py` 保留插件入口职责：
 
 - 初始化路径、`ConfigManager`、`HtmlRender` 和 `StatusService`
+- 构造 `ConfigManager` 前通过 `_normalize_legacy_config()` 归一化历史字符串布尔配置（仅修改内存，不主动保存）
 - 初始化 `TrafficUsageRecorder`，并在插件启停时启动或取消后台采样任务
 - 注册和注销 `astrbot_get_system_status`
 - 将 `/status`、`/状态` 事件转发给 `StatusService`
@@ -88,7 +89,9 @@ macOS 的 CPU 详情名称优先从 `system_profiler SPHardwareDataType` 的 `Ch
 - HTML 模板文本
 - `StatusPayload`
 
-它不负责发送消息；对外业务代码通过 `HtmlRender.render_status_image()` 和 `HtmlRender.build_status_text()` 使用渲染能力，不直接拼接状态图数据。状态图 payload 中的机器人名称会按 `core.constants.MAX_RENDERED_BOT_NAME_LENGTH` 做中间省略，文本摘要仍使用完整名称。
+它不负责发送消息；对外业务代码通过 `HtmlRender.render_status_image()` 和 `HtmlRender.build_status_text()` 使用渲染能力，不直接拼接状态图数据。
+
+状态卡 payload 中的机器人名称超过 `MAX_RENDERED_BOT_NAME_LENGTH=15` 字符时使用中间省略；CPU 和 System（操作系统）名称超过 `MAX_RENDERED_DETAIL_NAME_LENGTH=36` 字符时也使用中间省略，保持单行布局。名称截断仅发生在展示层，`SystemDataSource` 提供完整的 CPU 和系统名称，文本状态摘要保留完整名称。
 
 状态图 payload 中的当月流量由 `TrafficUsageRecorder` 格式化为详情框的 `Traffic` 行，月份使用英文缩写，例如 `Jul`；关闭流量统计时该行不渲染。
 
@@ -106,7 +109,7 @@ macOS 的 CPU 详情名称优先从 `system_profiler SPHardwareDataType` 的 `Ch
 
 ## `core/config_manager.py`
 
-`ConfigManager` 负责集中加载、归一化和校验 `_conf_schema.json` 中的配置字段。入口和核心模块应读取已解析后的属性，不要在业务流程里散落直接调用 `config.get(...)`。
+`ConfigManager.load()` 负责集中读取并容错解析配置字段，不直接修改原始 `AstrBotConfig`。历史字符串布尔值由插件构造时调用的 `normalize_legacy_bool_configs()` 在内存中归一化；Schema 类型校验和配置保存由 AstrBot 框架负责。入口和核心模块应读取已解析后的属性，不要在业务流程里散落直接调用 `config.get(...)`。
 
 `auto_use_current_name` 的语义是解析机器人自身名称或标识，用于状态卡片中的机器人名称展示。平台适配器无法提供机器人显示名时，名称解析应回退到 `event.get_platform_id()`，仍不可用时回退到手动配置的 `bot_name`；该配置不应解析为命令发送者名称。
 

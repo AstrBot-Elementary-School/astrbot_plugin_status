@@ -9,9 +9,18 @@ from astrbot.api.star import Context, Star, StarTools
 from astrbot.core.message.message_event_result import MessageChain
 from astrbot.core.provider.register import llm_tools
 
-from .core import ConfigManager, HtmlRender, StatusService, TrafficUsageRecorder
+from .core import (
+    ConfigManager,
+    HtmlRender,
+    StatusService,
+    TrafficUsageRecorder,
+    normalize_legacy_bool_configs,
+)
 from .core.constants import STATUS_TOOL_DESCRIPTION, STATUS_TOOL_NAME
+from .core.logger import logger
 from .core.traffic_usage import cancel_task
+
+_LEGACY_BOOL_KEYS = ("auto_use_current_name",)
 
 
 class StatusPlugin(Star):
@@ -21,6 +30,7 @@ class StatusPlugin(Star):
         super().__init__(context)
         self.context = context
         self.base_dir = Path(__file__).parent
+        self._normalize_legacy_config(config)
         self.config_manager = ConfigManager(config)
         self.config_manager.load()
         self.plugin_data_dir = StarTools.get_data_dir(self.name)
@@ -43,6 +53,20 @@ class StatusPlugin(Star):
             config_manager=self.config_manager,
             html_renderer=self.html_renderer,
         )
+
+    @staticmethod
+    def _normalize_legacy_config(config: AstrBotConfig) -> None:
+        """把历史字符串布尔配置就地归一化为原生 bool，不写盘。
+
+        兼容 Issue #23：旧配置中的 "true"/"false" 字符串会触发 WebUI 布尔
+        校验失败。这里只改内存对象；用户在 WebUI 正常保存时由 AstrBot 持久化。
+        """
+        invalid = normalize_legacy_bool_configs(config, _LEGACY_BOOL_KEYS)
+        for key in invalid:
+            logger.warning(
+                f"配置项 {key} 的值既不是布尔值也无法识别为布尔字符串，"
+                "已保留原值，请在 WebUI 中重新设置为开启或关闭。"
+            )
 
     async def initialize(self) -> None:
         """Register LLM tool for Agent to fetch status image."""

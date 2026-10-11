@@ -40,13 +40,6 @@ class SystemDataSource:
             logger.debug(f"Failed to get process start time: {e}, fallback to now")
             self._system_start = dt.datetime.now()
 
-    @staticmethod
-    def _truncate_text(text: str, max_length: int = 35) -> str:
-        """如果文本超过最大长度，则截断并添加省略号"""
-        if len(text) > max_length:
-            return text[:max_length] + "..."
-        return text
-
     def get_metrics(self) -> list[Metric]:
         """
         获取所有系统指标
@@ -92,7 +85,7 @@ class SystemDataSource:
         ]
 
     async def get_cpu_name(self) -> str:
-        """获取CPU名称，并截断过长的部分"""
+        """获取完整的 CPU 型号名称，展示层负责截断。"""
         system = platform.system()
         if system == "Linux":
             cpu_name = self._get_cpu_name_linux()
@@ -252,9 +245,9 @@ class SystemDataSource:
         return "Unknown CPU"
 
     def get_os_name(self) -> str:
-        """获取操作系统名称，并截断过长的部分"""
+        """获取完整的操作系统名称，展示层负责截断。"""
         os_name = f"{platform.system()} {platform.release()}"
-        return self._truncate_text(os_name)
+        return os_name
 
     def get_project_version(self, _event: AstrMessageEvent) -> str:
         """获取AstrBot项目版本"""

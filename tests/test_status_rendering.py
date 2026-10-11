@@ -127,7 +127,7 @@ def test_rendered_template_contains_paw_decorations() -> None:
 
 
 @pytest.mark.asyncio
-async def test_render_payload_uses_truncated_bot_name(
+async def test_render_payload_truncates_long_card_names(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     class FakeResolver:
@@ -139,10 +139,10 @@ async def test_render_payload_uses_truncated_bot_name(
             return []
 
         async def get_cpu_name(self) -> str:
-            return "CPU"
+            return "Intel(R) Xeon(R) Platinum 8259CL CPU @ 2.50GHz"
 
         def get_os_name(self) -> str:
-            return "OS"
+            return "Linux 6.12.74+deb13+1-cloud-amd64-extended"
 
         def get_project_version(self, _event: object) -> str:
             return "AstrBot"
@@ -179,6 +179,8 @@ async def test_render_payload_uses_truncated_bot_name(
     _, payload = await renderer.build_render_data(SimpleNamespace())
 
     assert payload.bot_name == "SuperL...ayName"
+    assert payload.cpu_name == "Intel(R) Xeon(R) ...CL CPU @ 2.50GHz"
+    assert payload.os_name == "Linux 6.12.74+deb...d-amd64-extended"
     assert payload.monthly_traffic == "Jul  ↑ 1.0 MB | ↓ 2.0 MB"
 
 
@@ -199,10 +201,10 @@ async def test_status_text_includes_monthly_traffic() -> None:
             ]
 
         async def get_cpu_name(self) -> str:
-            return "CPU"
+            return "Intel(R) Xeon(R) Platinum 8259CL CPU @ 2.50GHz"
 
         def get_os_name(self) -> str:
-            return "OS"
+            return "Linux 6.12.74+deb13+1-cloud-amd64-extended"
 
         def get_project_version(self, _event: object) -> str:
             return "AstrBot"
@@ -236,6 +238,8 @@ async def test_status_text_includes_monthly_traffic() -> None:
     text = await renderer.build_status_text(SimpleNamespace())
 
     assert "本月流量: 合计 3.0 MB，上传 1.0 MB，下载 2.0 MB" in text
+    assert "CPU: Intel(R) Xeon(R) Platinum 8259CL CPU @ 2.50GHz" in text
+    assert "操作系统: Linux 6.12.74+deb13+1-cloud-amd64-extended" in text
 
 
 def test_bottom_paw_decorations_remain_visible_inside_card() -> None:
