@@ -59,7 +59,11 @@ Windows PowerShell：
 
 ## AstrBot 集成回归
 
-`tests/test_config_integration.py` 使用真实 AstrBot 的 `AstrBotConfig`、`validate_config()` 和 `save_config()`，覆盖"读取旧配置 → 插件归一化 → WebUI 保存 → 重新加载"全链路（参数化历史 `"true"`、`"false"` 与原生 `false`）。该测试仅在**未安装 AstrBot** 时整体跳过；已安装但子模块导入失败会暴露为测试错误，不会被 skip 掩盖。本机已安装 AstrBot（4.27.3）时三个用例必须实际执行通过。
+`tests/test_config_integration.py` 在独立子进程中使用真实 AstrBot 的 `AstrBotConfig`、`validate_config()` 和 `save_config()`，依次验证历史 `"true"`、`"false"` 与原生 `false` 的读取 → 核心归一化 → 框架校验和保存 → 重新加载。该测试直接调用 `normalize_legacy_bool_configs()`，**不实例化 `StatusPlugin`，也不启动浏览器 WebUI**。
+
+`tests/test_architecture_boundaries.py` 使用 AST 静态检查 `StatusPlugin.__init__` 在 `ConfigManager` 构造和 `load()` 前执行迁移调用，且二者接收同一个 `config`；同时检查 `_LEGACY_BOOL_KEYS` 定义包含 `auto_use_current_name`。静态检查不等同于插件实际启动测试。
+
+未安装 AstrBot 时集成测试会跳过；已安装但相关子模块导入失败则报告测试失败。在 AstrBot 4.27.3 环境中，应确认三种配置情形实际验证通过而非跳过；更旧版本的框架校验函数导入路径可能不同，需单独适配测试。
 
 ## Playwright 辅助检查
 

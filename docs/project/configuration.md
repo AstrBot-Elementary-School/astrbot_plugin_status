@@ -46,4 +46,4 @@
 - `migrate_legacy_bool_config()` 的返回值区分三种情况：`True` 表示已归一化历史字符串；`False` 表示无需迁移（字段缺失或已是原生布尔值）；`None` 表示值不合法（无法识别的字符串，或非 `bool` 非 `str` 的其他类型）。
 - 非法值一律**保留原值不覆盖**并记录 warning，需在 WebUI 中重新设置为开启或关闭；原生布尔值不会被改动。
 - 归一化只在插件启用（初始化）时执行；插件处于禁用状态时旧配置不会被自动归一化。
-- 全链路（真实 `AstrBotConfig` 读取旧配置 → 归一化 → WebUI 保存 → 重新加载）由 `tests/test_config_integration.py` 覆盖，参数化验证历史 `"true"`、`"false"` 与原生 `false`。
+- `tests/test_config_integration.py` 使用真实 `AstrBotConfig` 验证历史 `"true"`、`"false"` 和原生 `false` 的读取 → 核心归一化 → `validate_config()` 校验 → `save_config()` 保存 → 重新加载。它不实例化 `StatusPlugin`，也不执行浏览器 WebUI 操作；插件构造函数的迁移调用顺序由 `tests/test_architecture_boundaries.py` 中的 AST 测试单独检查。
