@@ -1,4 +1,10 @@
-"""Issue #23 集成回归：真实 AstrBotConfig -> 插件归一化 -> WebUI 保存 -> 重新加载。
+"""Issue #23 集成回归：真实 AstrBotConfig -> 配置归一化 -> WebUI 保存 -> 重新加载。
+
+覆盖范围：**配置核心的迁移与持久化链路**。直接调用 `normalize_legacy_bool_configs()`
+（即 `StatusPlugin._normalize_legacy_config` 内部使用的函数），验证真实
+`AstrBotConfig` 的加载、归一化、校验、保存与重载行为。它**不**实例化
+`StatusPlugin`，因此不覆盖构造函数是否调用归一化——该调用关系由
+`tests/test_architecture_boundaries.py` 的 AST 测试保证。
 
 本测试在**独立子进程**中运行：其它测试模块会在导入阶段注入假 `astrbot` /
 `psutil` 桩，污染 `sys.modules`；子进程隔离可拿到干净的真实 AstrBot，且不会
@@ -100,7 +106,11 @@ _PROBE = textwrap.dedent(
 
 
 def test_legacy_bool_full_chain_in_subprocess() -> None:
-    """在干净子进程中验证历史 'true'/'false'/原生 false 的完整链路。"""
+    """在干净子进程中验证历史 'true'/'false'/原生 false 的配置迁移与持久化链路。
+
+    注意：本测试直接调用归一化函数，不实例化 StatusPlugin；构造函数是否调用
+    归一化由 test_architecture_boundaries.py 的 AST 测试覆盖。
+    """
     proc = subprocess.run(
         [sys.executable, "-c", _PROBE, str(ROOT)],
         capture_output=True,
