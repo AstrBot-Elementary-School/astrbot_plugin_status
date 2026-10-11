@@ -175,6 +175,16 @@ def test_migrate_legacy_bool_config_rejects_invalid_string() -> None:
     assert config["auto_use_current_name"] == "maybe"
 
 
+def test_migrate_legacy_bool_config_rejects_invalid_types() -> None:
+    """非 bool 非 str 的值属于类型不合法，返回 None 且不覆盖原值。"""
+    for invalid in (None, 0, 1, 2, [], {}, [True], {"on": True}, 1.0):
+        config = {"auto_use_current_name": invalid}
+        assert migrate_legacy_bool_config(config, "auto_use_current_name") is None, (
+            invalid
+        )
+        assert config["auto_use_current_name"] == invalid, invalid
+
+
 def test_migrate_legacy_bool_config_is_idempotent() -> None:
     config = {"auto_use_current_name": "true"}
     assert migrate_legacy_bool_config(config, "auto_use_current_name") is True

@@ -43,5 +43,7 @@
 - 旧版本曾把 `auto_use_current_name` 的默认值写成字符串 `"true"`，导致 AstrBot WebUI 保存配置时布尔类型校验失败（Issue #23）。
 - 插件加载时会调用 `core.config_manager.normalize_legacy_bool_configs()`，把该字段的历史字符串布尔值在内存中归一化为原生布尔值，**不主动写盘**；用户在 WebUI 正常保存时由 AstrBot 完成持久化。
 - 归一化复用与运行时读取相同的映射（`parse_bool_token()`）：`true`/`1`/`yes`/`on` 视为 `True`，`false`/`0`/`no`/`off` 视为 `False`，忽略大小写和首尾空格。
-- 无法识别的字符串会保留原值并记录 warning，需在 WebUI 中重新设置为开启或关闭。
+- `migrate_legacy_bool_config()` 的返回值区分三种情况：`True` 表示已归一化历史字符串；`False` 表示无需迁移（字段缺失或已是原生布尔值）；`None` 表示值不合法（无法识别的字符串，或非 `bool` 非 `str` 的其他类型）。
+- 非法值一律**保留原值不覆盖**并记录 warning，需在 WebUI 中重新设置为开启或关闭；原生布尔值不会被改动。
 - 归一化只在插件启用（初始化）时执行；插件处于禁用状态时旧配置不会被自动归一化。
+- 全链路（真实 `AstrBotConfig` 读取旧配置 → 归一化 → WebUI 保存 → 重新加载）由 `tests/test_config_integration.py` 覆盖，参数化验证历史 `"true"`、`"false"` 与原生 `false`。

@@ -57,6 +57,10 @@ Windows PowerShell：
 | 测试接口 | `http://localhost:8999/text2img/generate` |
 | 生成图读取 | `http://localhost:8999/text2img/{image_id}` |
 
+## AstrBot 集成回归
+
+`tests/test_config_integration.py` 使用真实 AstrBot 的 `AstrBotConfig`、`validate_config()` 和 `save_config()`，覆盖"读取旧配置 → 插件归一化 → WebUI 保存 → 重新加载"全链路（参数化历史 `"true"`、`"false"` 与原生 `false`）。该测试仅在**未安装 AstrBot** 时整体跳过；已安装但子模块导入失败会暴露为测试错误，不会被 skip 掩盖。本机已安装 AstrBot（4.27.3）时三个用例必须实际执行通过。
+
 ## Playwright 辅助检查
 
 Playwright 不属于插件运行时依赖，但模板、截图和图片裁剪问题适合用浏览器自动化复现。修改 `templates/main.html` 或 `templates/res/css/style.css` 时，建议结合 Playwright 生成截图或检查元素布局，再配合 T2I 回归确认 AstrBot 渲染输出。

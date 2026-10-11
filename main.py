@@ -61,11 +61,11 @@ class StatusPlugin(Star):
         兼容 Issue #23：旧配置中的 "true"/"false" 字符串会触发 WebUI 布尔
         校验失败。这里只改内存对象；用户在 WebUI 正常保存时由 AstrBot 持久化。
         """
-        unrecognized = normalize_legacy_bool_configs(config, _LEGACY_BOOL_KEYS)
-        for key in unrecognized:
+        invalid = normalize_legacy_bool_configs(config, _LEGACY_BOOL_KEYS)
+        for key in invalid:
             logger.warning(
-                f"配置项 {key} 的值无法识别为布尔值，已保留原值，"
-                "请在 WebUI 中重新设置为开启或关闭。"
+                f"配置项 {key} 的值既不是布尔值也无法识别为布尔字符串，"
+                "已保留原值，请在 WebUI 中重新设置为开启或关闭。"
             )
 
     async def initialize(self) -> None:

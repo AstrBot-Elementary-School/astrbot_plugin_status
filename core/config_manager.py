@@ -29,38 +29,47 @@ def parse_bool_token(value: Any) -> bool | None:
     return None
 
 
+_MISSING = object()
+
+
 def migrate_legacy_bool_config(config: Any, key: str) -> bool | None:
     """原地把历史字符串布尔配置归一化为原生 bool，不写盘。
 
-    只处理可识别的布尔字符串；原生布尔与缺失字段保持不变。返回：
+    返回值区分三种情况：
 
-    - ``True``: 发生了归一化
-    - ``False``: 无需处理（缺失或已是原生布尔）
-    - ``None``: 值为无法识别的字符串，保留原值交由调用方诊断
+    - ``True``: 成功把历史字符串归一化为原生 bool
+    - ``False``: 无需迁移（字段缺失，或已经是原生布尔值）
+    - ``None``: 值不合法（无法识别的字符串，或其他非法类型），
+      保留原值不覆盖，交由调用方诊断
     """
-    value = config.get(key)
-    if not isinstance(value, str):
+    value = config.get(key, _MISSING)
+    if value is _MISSING:
         return False
-    parsed = parse_bool_token(value)
-    if parsed is None:
-        return None
-    config[key] = parsed
-    return True
+    if isinstance(value, bool):
+        return False
+    if isinstance(value, str):
+        parsed = parse_bool_token(value)
+        if parsed is None:
+            return None
+        config[key] = parsed
+        return True
+    return None
 
 
 def normalize_legacy_bool_configs(
     config: Any,
     keys: Iterable[str],
 ) -> list[str]:
-    """批量归一化历史字符串布尔配置，返回无法识别的键列表。
+    """批量归一化历史字符串布尔配置，返回不合法的键列表。
 
-    只改内存对象，不写盘。无法识别的值保留原值，交由调用方诊断。
+    只改内存对象，不写盘。无法识别的字符串或其他非法类型保留原值，
+    交由调用方诊断。
     """
-    unrecognized: list[str] = []
+    invalid: list[str] = []
     for key in keys:
         if migrate_legacy_bool_config(config, key) is None:
-            unrecognized.append(key)
-    return unrecognized
+            invalid.append(key)
+    return invalid
 
 
 @dataclass(slots=True, frozen=True)
