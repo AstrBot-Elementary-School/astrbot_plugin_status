@@ -1,13 +1,66 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Any
+from typing import Any, Iterable
 
 from .constants import (
     DEFAULT_BOT_NAME,
     DEFAULT_COMMENT_PROMPT,
     DEFAULT_VISION_PROMPT,
 )
+
+_BOOL_TRUE_TOKENS = frozenset({"true", "1", "yes", "on"})
+_BOOL_FALSE_TOKENS = frozenset({"false", "0", "no", "off"})
+
+
+def parse_bool_token(value: Any) -> bool | None:
+    """解析布尔值或布尔字符串；无法识别时返回 None。
+
+    运行时读取与历史配置归一化共用同一套映射，避免两处规则漂移。
+    """
+    if isinstance(value, bool):
+        return value
+    if isinstance(value, str):
+        normalized = value.strip().lower()
+        if normalized in _BOOL_TRUE_TOKENS:
+            return True
+        if normalized in _BOOL_FALSE_TOKENS:
+            return False
+    return None
+
+
+def migrate_legacy_bool_config(config: Any, key: str) -> bool | None:
+    """原地把历史字符串布尔配置归一化为原生 bool，不写盘。
+
+    只处理可识别的布尔字符串；原生布尔与缺失字段保持不变。返回：
+
+    - ``True``: 发生了归一化
+    - ``False``: 无需处理（缺失或已是原生布尔）
+    - ``None``: 值为无法识别的字符串，保留原值交由调用方诊断
+    """
+    value = config.get(key)
+    if not isinstance(value, str):
+        return False
+    parsed = parse_bool_token(value)
+    if parsed is None:
+        return None
+    config[key] = parsed
+    return True
+
+
+def normalize_legacy_bool_configs(
+    config: Any,
+    keys: Iterable[str],
+) -> list[str]:
+    """批量归一化历史字符串布尔配置，返回无法识别的键列表。
+
+    只改内存对象，不写盘。无法识别的值保留原值，交由调用方诊断。
+    """
+    unrecognized: list[str] = []
+    for key in keys:
+        if migrate_legacy_bool_config(config, key) is None:
+            unrecognized.append(key)
+    return unrecognized
 
 
 @dataclass(slots=True, frozen=True)
@@ -96,15 +149,8 @@ class ConfigManager:
 
     @classmethod
     def _normalize_bool(cls, value: Any, default: bool) -> bool:
-        if isinstance(value, bool):
-            return value
-        if isinstance(value, str):
-            normalized = value.strip().lower()
-            if normalized in {"true", "1", "yes", "on"}:
-                return True
-            if normalized in {"false", "0", "no", "off"}:
-                return False
-        return default
+        parsed = parse_bool_token(value)
+        return default if parsed is None else parsed
 
     def _get_object(self, key: str) -> dict[str, Any]:
         value = self.config.get(key, {})

@@ -2,7 +2,7 @@
   "auto_use_current_name": {
     "type": "bool",
     "description": "自动获取机器人名称",
-    "default": "true"
+    "default": true
   },
   "bot_name": {
     "type": "string",

@@ -1,5 +1,10 @@
 from .bot_identity_resolver import BotIdentityResolver
-from .config_manager import ConfigManager, LLMAnalysisConfig, TrafficMonitorConfig
+from .config_manager import (
+    ConfigManager,
+    LLMAnalysisConfig,
+    TrafficMonitorConfig,
+    normalize_legacy_bool_configs,
+)
 from .data_source import SystemDataSource
 from .html_render import HtmlRender
 from .logger import StatusLogger, get_logger
@@ -21,4 +26,5 @@ __all__ = [
     "MonthlyTrafficUsage",
     "TrafficUsageRecorder",
     "get_logger",
+    "normalize_legacy_bool_configs",
 ]
