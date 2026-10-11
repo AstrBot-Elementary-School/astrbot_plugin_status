@@ -34,6 +34,16 @@ def _data_source() -> SystemDataSource:
     return SystemDataSource(SimpleNamespace(), ROOT)
 
 
+def test_os_name_preserves_long_release_for_text_summary(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    release = "6.12.74+deb13+1-cloud-amd64-extended"
+    monkeypatch.setattr(platform_module, "system", lambda: "Linux")
+    monkeypatch.setattr(platform_module, "release", lambda: release)
+
+    assert _data_source().get_os_name() == f"Linux {release}"
+
+
 @pytest.mark.asyncio
 async def test_macos_cpu_name_uses_system_profiler_chip(
     monkeypatch: pytest.MonkeyPatch,

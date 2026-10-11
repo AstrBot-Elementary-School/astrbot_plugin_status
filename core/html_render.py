@@ -13,6 +13,7 @@ from .config_manager import ConfigManager
 from .constants import (
     DEFAULT_DASHBOARD_NAME,
     MAX_RENDERED_BOT_NAME_LENGTH,
+    MAX_RENDERED_DETAIL_NAME_LENGTH,
     RENDER_OPTIONS,
 )
 from .data_source import SystemDataSource
@@ -154,8 +155,14 @@ CPU: {metrics_map.get("CPU", "N/A")}
             css_style=f"<style>{css}</style>",
             bot_name=truncate_middle(bot_name, MAX_RENDERED_BOT_NAME_LENGTH),
             metrics=self.data_source.get_metrics(),
-            cpu_name=await self.data_source.get_cpu_name(),
-            os_name=self.data_source.get_os_name(),
+            cpu_name=truncate_middle(
+                await self.data_source.get_cpu_name(),
+                MAX_RENDERED_DETAIL_NAME_LENGTH,
+            ),
+            os_name=truncate_middle(
+                self.data_source.get_os_name(),
+                MAX_RENDERED_DETAIL_NAME_LENGTH,
+            ),
             project_version=self.data_source.get_project_version(event),
             plugin_count=plugin_count_str,
             upload_speed=f"{upload_kbs:.1f}",
