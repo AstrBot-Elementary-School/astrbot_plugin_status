@@ -39,8 +39,8 @@ HtmlRender = html_render_module.HtmlRender
 class _FakeTrafficRecorder:
     async def sample(self) -> SimpleNamespace:
         return SimpleNamespace(
-            card_text="Jul  ↑ 1.0 MB | ↓ 2.0 MB",
-            summary_text="合计 3.0 MB，上传 1.0 MB，下载 2.0 MB",
+            card_text="Jul  ↑ 1.0 MiB | ↓ 2.0 MiB",
+            summary_text="合计 3.0 MiB，上传 1.0 MiB，下载 2.0 MiB",
         )
 
 
@@ -66,9 +66,9 @@ def _render_payload() -> tuple[str, dict[str, object]]:
         "bot_name": "AstrBot",
         "metrics": [
             _metric("icon-cpu", "CPU", "12.3% - 3.20GHz [8 Core]", 297.55),
-            _metric("icon-ram", "RAM", "4.25 / 16.00 GB", 249.11),
-            _metric("icon-swap", "SWAP", "0.00 / 2.00 GB", 339.29),
-            _metric("icon-disk", "DISK", "120.00 / 512.00 GB", 259.79),
+            _metric("icon-ram", "RAM", "4.25 / 16.00 GiB", 249.11),
+            _metric("icon-swap", "SWAP", "0.00 / 2.00 GiB", 339.29),
+            _metric("icon-disk", "DISK", "120.00 / 512.00 GiB", 259.79),
             _metric("icon-load", "LOAD", "22.0% / 100%", 264.65),
         ],
         "cpu_name": "Apple M1 Pro",
@@ -77,7 +77,7 @@ def _render_payload() -> tuple[str, dict[str, object]]:
         "plugin_count": "12",
         "upload_speed": "1.2",
         "download_speed": "3.4",
-        "monthly_traffic": "Jul  ↑ 1.0 GB | ↓ 2.0 GB",
+        "monthly_traffic": "Jul  ↑ 1.0 GiB | ↓ 2.0 GiB",
         "dashboard_name": "AstrBot",
         "uptime": "00:12:34",
     }
@@ -123,7 +123,7 @@ def test_rendered_template_contains_paw_decorations() -> None:
     assert 'class="card"' in rendered
     assert rendered.count("bg-") >= 4
     assert "Traffic" in rendered
-    assert "Jul  ↑ 1.0 GB | ↓ 2.0 GB" in rendered
+    assert "Jul  ↑ 1.0 GiB | ↓ 2.0 GiB" in rendered
 
 
 @pytest.mark.asyncio
@@ -181,7 +181,7 @@ async def test_render_payload_truncates_long_card_names(
     assert payload.bot_name == "SuperL...ayName"
     assert payload.cpu_name == "Intel(R) Xeon(R) ...CL CPU @ 2.50GHz"
     assert payload.os_name == "Linux 6.12.74+deb...d-amd64-extended"
-    assert payload.monthly_traffic == "Jul  ↑ 1.0 MB | ↓ 2.0 MB"
+    assert payload.monthly_traffic == "Jul  ↑ 1.0 MiB | ↓ 2.0 MiB"
 
 
 @pytest.mark.asyncio
@@ -194,9 +194,9 @@ async def test_status_text_includes_monthly_traffic() -> None:
         def get_metrics(self) -> list[SimpleNamespace]:
             return [
                 SimpleNamespace(label="CPU", value="1.0%"),
-                SimpleNamespace(label="RAM", value="1 / 2 GB"),
-                SimpleNamespace(label="SWAP", value="0 / 1 GB"),
-                SimpleNamespace(label="DISK", value="1 / 10 GB"),
+                SimpleNamespace(label="RAM", value="1 / 2 GiB"),
+                SimpleNamespace(label="SWAP", value="0 / 1 GiB"),
+                SimpleNamespace(label="DISK", value="1 / 10 GiB"),
                 SimpleNamespace(label="LOAD", value="1.0% / 100%"),
             ]
 
@@ -237,7 +237,7 @@ async def test_status_text_includes_monthly_traffic() -> None:
 
     text = await renderer.build_status_text(SimpleNamespace())
 
-    assert "本月流量: 合计 3.0 MB，上传 1.0 MB，下载 2.0 MB" in text
+    assert "本月流量: 合计 3.0 MiB，上传 1.0 MiB，下载 2.0 MiB" in text
     assert "CPU: Intel(R) Xeon(R) Platinum 8259CL CPU @ 2.50GHz" in text
     assert "操作系统: Linux 6.12.74+deb13+1-cloud-amd64-extended" in text
 
