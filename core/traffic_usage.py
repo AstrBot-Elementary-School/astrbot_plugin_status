@@ -282,13 +282,13 @@ def format_month_abbreviation(month: str) -> str:
 def format_bytes(value: int) -> str:
     size = max(0, int(value))
     if size >= BYTES_PER_TB:
-        return f"{size / BYTES_PER_TB:.1f} TB"
+        return f"{size / BYTES_PER_TB:.1f} TiB"
     if size >= BYTES_PER_GB:
-        return f"{size / BYTES_PER_GB:.1f} GB"
+        return f"{size / BYTES_PER_GB:.1f} GiB"
     if size >= BYTES_PER_MB:
-        return f"{size / BYTES_PER_MB:.1f} MB"
+        return f"{size / BYTES_PER_MB:.1f} MiB"
     if size >= BYTES_PER_KB:
-        return f"{size / BYTES_PER_KB:.1f} KB"
+        return f"{size / BYTES_PER_KB:.1f} KiB"
     return f"{size} B"
 
 
@@ -300,7 +300,7 @@ def build_alert_text(
     return (
         "本月流量提醒\n"
         f"月份: {usage.month}\n"
-        f"阈值: {format_gb_value(threshold_gb)} GB\n"
+        f"阈值: {format_gb_value(threshold_gb)} GiB\n"
         f"当前合计: {format_bytes(usage.total_bytes)}\n"
         f"上传: {format_bytes(usage.upload_bytes)}\n"
         f"下载: {format_bytes(usage.download_bytes)}"
