@@ -1,6 +1,6 @@
 name: astrbot_plugin_status
 display_name: 系统状态
-version: v2.1.1
+version: v2.1.2
 author: FlanChanXwO
 desc: 简易又可爱的系统状态展示插件，支持接入到LLM
 repo: https://github.com/FlanChanXwO/astrbot_plugin_status

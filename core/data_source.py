@@ -61,19 +61,19 @@ class SystemDataSource:
             Metric(
                 icon_class="icon-ram",
                 label="RAM",
-                value=f"{mem_used_gb:.2f} / {mem_total_gb:.2f} GB",
+                value=f"{mem_used_gb:.2f} / {mem_total_gb:.2f} GiB",
                 offset=self._offset(mem_pct),
             ),
             Metric(
                 icon_class="icon-swap",
                 label="SWAP",
-                value=f"{swap_used_gb:.2f} / {swap_total_gb:.2f} GB",
+                value=f"{swap_used_gb:.2f} / {swap_total_gb:.2f} GiB",
                 offset=self._offset(swap_pct),
             ),
             Metric(
                 icon_class="icon-disk",
                 label="DISK",
-                value=f"{disk_used_gb:.2f} / {disk_total_gb:.2f} GB",
+                value=f"{disk_used_gb:.2f} / {disk_total_gb:.2f} GiB",
                 offset=self._offset(disk_pct),
             ),
             Metric(
@@ -296,7 +296,7 @@ class SystemDataSource:
             return 0
 
     def get_net_speed_kbs(self) -> tuple[float, float]:
-        """获取上传和下载速度 (KB/s)"""
+        """获取上传和下载速度 (KiB/s)"""
         now = time.monotonic()
         try:
             io = psutil.net_io_counters()

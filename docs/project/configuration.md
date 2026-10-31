@@ -22,7 +22,7 @@
 | --- | --- | --- | --- |
 | `enabled` | `bool` | `true` | 开启当月流量统计；关闭后不启动后台采样，也不在状态卡片展示流量行。 |
 | `alert_enabled` | `bool` | `false` | 开启当月流量阈值提醒。 |
-| `alert_threshold_gb` | `float` | `100.0` | 提醒阈值，单位固定为 GB，支持小数，按上传和下载合计计算。 |
+| `alert_threshold_gb` | `float` | `100.0` | 提醒阈值，单位固定为 GiB，支持小数，按上传和下载合计计算。 |
 | `alert_target_umo` | `string` | 空字符串 | 提醒目标 UMO，例如 `aiocqhttp:group:123456`；留空时不主动发送提醒。 |
 
 ## 配置维护规则

@@ -39,8 +39,8 @@
       },
       "alert_threshold_gb": {
         "type": "float",
-        "description": "提醒阈值（GB）",
-        "hint": "按上传 + 下载合计计算，单位固定为 GB。",
+        "description": "提醒阈值（GiB）",
+        "hint": "按上传 + 下载合计计算，单位固定为 GiB。",
         "default": 100.0
       },
       "alert_target_umo": {
