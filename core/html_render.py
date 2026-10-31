@@ -111,7 +111,7 @@ CPU: {metrics_map.get("CPU", "N/A")}
 
 网络与插件
 ----------
-网络速度: ↑{upload_kbs:.1f} KB/s ↓{download_kbs:.1f} KB/s
+网络速度: ↑{upload_kbs:.1f} KiB/s ↓{download_kbs:.1f} KiB/s
 已加载插件: {plugin_count} 个{monthly_traffic_line}"""
 
     async def build_render_data(
